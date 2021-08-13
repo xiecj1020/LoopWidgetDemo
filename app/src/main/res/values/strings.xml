@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">LoopWidgetDemo</string>
+    <string name="hor_hint_txt">横向循环滚动</string>
+    <string name="ver_hint_txt">竖向循环滚动</string>
+</resources>
