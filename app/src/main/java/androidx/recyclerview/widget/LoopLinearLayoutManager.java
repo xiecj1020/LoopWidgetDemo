@@ -393,13 +393,11 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
     @Override
     public View findViewByPosition(int position) {
         final int childCount = getChildCount();
-        android.util.Log.e("mytag","childCount="+childCount);
         if (childCount == 0) {
             return null;
         }
         final int firstChild = getPosition(getChildAt(0));
         final int viewPosition = position - firstChild;
-        android.util.Log.e("mytag","firstChild="+firstChild+",position="+position+",viewPosition="+viewPosition);
         if (viewPosition >= 0 && viewPosition < childCount) {
             final View child = getChildAt(viewPosition);
             if (getPosition(child) == position) {
