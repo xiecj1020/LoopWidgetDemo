@@ -786,6 +786,7 @@ public final class LoopViewPager2 extends ViewGroup {
     }
 
     /**
+     * 注意limit这个参数，如果为默认值(OFFSCREEN_PAGE_LIMIT_DEFAULT)则adapter的最小数据要为3个，否则为limit+3个。
      * <p>Set the number of pages that should be retained to either side of the currently visible
      * page(s). Pages beyond this limit will be recreated from the adapter when needed. Set this to
      * {@link #OFFSCREEN_PAGE_LIMIT_DEFAULT} to use RecyclerView's caching strategy. The given value

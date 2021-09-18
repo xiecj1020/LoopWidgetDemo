@@ -66,9 +66,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         mHorViewPager = findViewById(R.id.hor_viewpager);
+        //注意如果setOffscreenPageLimit没有调用，则adapter的最小数据要为3个，否则为PageLimit+3个。
+        mHorViewPager.setOffscreenPageLimit(1);
         mHorViewPager.setAdapter(new MyAdapter());
         mHorViewPager.registerOnPageChangeCallback(mOnPageChangeCallback);
         mVerViewPager = findViewById(R.id.ver_viewpager);
+        //注意如果setOffscreenPageLimit没有调用，则adapter的最小数据要为3个，否则为PageLimit+3个。
+        mVerViewPager.setOffscreenPageLimit(1);
         mVerViewPager.setAdapter(new MyAdapter());
         mVerViewPager.registerOnPageChangeCallback(mOnPageChangeCallback);
     }
