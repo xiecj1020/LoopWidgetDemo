@@ -171,6 +171,13 @@ final class LoopScrollEventAdapter extends RecyclerView.OnScrollListener {
             // the first scroll event after settling already got us at the target
             mTarget = scrollingForward && mScrollValues.mOffsetPx != 0
                     ? mScrollValues.mPosition + 1 : mScrollValues.mPosition;
+            RecyclerView.Adapter<?> adapter = mViewPager.getAdapter();
+            if (adapter != null) {
+                int count = adapter.getItemCount();
+                if (count > 0) {
+                    mTarget = mTarget % count;
+                }
+            }
             if (mDragStartPosition != mTarget) {
                 dispatchSelected(mTarget);
             }
@@ -209,6 +216,7 @@ final class LoopScrollEventAdapter extends RecyclerView.OnScrollListener {
         ScrollEventValues values = mScrollValues;
 
         values.mPosition = mLayoutManager.findFirstVisibleItemPosition();
+        android.util.Log.e("mytag","updateScrollEventValues values.mPosition="+values.mPosition);
         if (values.mPosition == RecyclerView.NO_POSITION) {
             values.reset();
             return;
