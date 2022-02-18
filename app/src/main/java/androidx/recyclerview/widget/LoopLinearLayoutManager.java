@@ -152,7 +152,7 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
      * @param reverseLayout When set to true, layouts from end to start.
      */
     public LoopLinearLayoutManager(Context context, int orientation,
-                               boolean reverseLayout) {
+                                   boolean reverseLayout) {
         setOrientation(orientation);
         setReverseLayout(reverseLayout);
     }
@@ -160,13 +160,13 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
     /**
      * Constructor used when layout manager is set in XML by RecyclerView attribute
      * "layoutManager". Defaults to vertical orientation.
-     *
+     * <p>
      * {@link android.R.attr#orientation}
      * {@link androidx.recyclerview.R.attr#reverseLayout}
      * {@link androidx.recyclerview.R.attr#stackFromEnd}
      */
     public LoopLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr,
-                               int defStyleRes) {
+                                   int defStyleRes) {
         Properties properties = getProperties(context, attrs, defStyleAttr, defStyleRes);
         setOrientation(properties.orientation);
         setReverseLayout(properties.reverseLayout);
@@ -368,12 +368,12 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
      * Used to reverse item traversal and layout order.
      * This behaves similar to the layout change for RTL views. When set to true, first item is
      * laid out at the end of the UI, second item is laid out before it etc.
-     *
+     * <p>
      * For horizontal layouts, it depends on the layout direction.
      * When set to true, If {@link RecyclerView} is LTR, than it will
      * layout from RTL, if {@link RecyclerView}} is RTL, it will layout
      * from LTR.
-     *
+     * <p>
      * If you are looking for the exact same behavior of
      * {@link android.widget.AbsListView#setStackFromBottom(boolean)}, use
      * {@link #setStackFromEnd(boolean)}
@@ -403,6 +403,29 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
             if (getPosition(child) == position) {
                 return child; // in pre-layout, this may not match
             }
+        }
+        // fallback to traversal. This might be necessary in pre-layout.
+        return super.findViewByPosition(position);
+    }
+
+    public View findViewByPositionFling(int position) {
+        final int childCount = getChildCount();
+        if (childCount == 0) {
+            return null;
+        }
+        final int firstChild = getPosition(getChildAt(0));
+        final int viewPosition = position - firstChild;
+        View lastChild = null;
+        if (viewPosition >= 0 && viewPosition < childCount) {
+            for (int i = viewPosition; i < childCount; i++) {
+                final View child = getChildAt(i);
+                if (getPosition(child) == position) {
+                    lastChild = child; // in pre-layout, this may not match
+                }
+            }
+        }
+        if (lastChild != null) {
+            return lastChild;
         }
         // fallback to traversal. This might be necessary in pre-layout.
         return super.findViewByPosition(position);
@@ -491,6 +514,21 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
                 new LinearSmoothScroller(recyclerView.getContext());
         linearSmoothScroller.setTargetPosition(position);
         startSmoothScroll(linearSmoothScroller);
+    }
+
+    public void startSmoothScrollForFling(RecyclerView.SmoothScroller smoothScroller, int velocityX,
+                                          int velocityY) {
+        if (mSmoothScroller != null && smoothScroller != mSmoothScroller
+                && mSmoothScroller.isRunning()) {
+            mSmoothScroller.stop();
+        }
+        mSmoothScroller = smoothScroller;
+        if (mSmoothScroller instanceof LoopLinearSmoothScroller) {
+            LoopLinearSmoothScroller loopLinearSmoothScroller = (LoopLinearSmoothScroller) mSmoothScroller;
+            loopLinearSmoothScroller.startFling(mRecyclerView, this, velocityX, velocityY);
+        } else {
+            mSmoothScroller.start(mRecyclerView, this);
+        }
     }
 
     @Override
@@ -1191,7 +1229,7 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
      * If you use a list in which items have different dimensions, the scrollbar will change
      * appearance as the user scrolls through the list. To avoid this issue,  you need to disable
      * this property.
-     *
+     * <p>
      * When smooth scrollbar is disabled, the position and size of the scrollbar thumb is based
      * solely on the number of items in the adapter and the position of the visible items inside
      * the adapter. This provides a stable scrollbar as the user navigates through a list of items
@@ -1617,7 +1655,7 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
 
     void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
                      LayoutState layoutState, LayoutChunkResult result) {
-        View view = layoutState.next(recycler,state);
+        View view = layoutState.next(recycler, state);
         if (view == null) {
             if (DEBUG && layoutState.mScrapList == null) {
                 throw new RuntimeException("received null view when unexpected");
@@ -1815,8 +1853,8 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
      *   <li> An invalid child.
      * </ol>
      *
-     * @param layoutFromEnd True if the RV scrolls in the reverse direction, which is the same as
-     *                      (reverseLayout ^ stackFromEnd).
+     * @param layoutFromEnd                  True if the RV scrolls in the reverse direction, which is the same as
+     *                                       (reverseLayout ^ stackFromEnd).
      * @param traverseChildrenInReverseOrder True if the children should be traversed in reverse
      *                                       order (stackFromEnd).
      * @return A View that can be used an an anchor View.
@@ -2115,7 +2153,7 @@ public class LoopLinearLayoutManager extends RecyclerView.LayoutManager implemen
      * Used for debugging.
      * Validates that child views are laid out in correct order. This is important because rest of
      * the algorithm relies on this constraint.
-     *
+     * <p>
      * In default layout, child 0 should be closest to screen position 0 and last child should be
      * closest to position WIDTH or HEIGHT.
      * In reverse layout, last child should be closes to screen position 0 and first child should

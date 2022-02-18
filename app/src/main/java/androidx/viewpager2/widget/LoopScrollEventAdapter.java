@@ -216,7 +216,6 @@ final class LoopScrollEventAdapter extends RecyclerView.OnScrollListener {
         ScrollEventValues values = mScrollValues;
 
         values.mPosition = mLayoutManager.findFirstVisibleItemPosition();
-        android.util.Log.e("mytag","updateScrollEventValues values.mPosition="+values.mPosition);
         if (values.mPosition == RecyclerView.NO_POSITION) {
             values.reset();
             return;

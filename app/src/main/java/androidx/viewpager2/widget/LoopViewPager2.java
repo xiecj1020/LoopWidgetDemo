@@ -34,6 +34,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat;
 import androidx.core.view.accessibility.AccessibilityViewCommand;
 import androidx.recyclerview.widget.LoopLinearLayoutManager;
+import androidx.recyclerview.widget.LoopPagerSnapHelper;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
@@ -124,7 +125,7 @@ public final class LoopViewPager2 extends ViewGroup {
     private int mPendingCurrentItem = NO_POSITION;
     private Parcelable mPendingAdapterState;
     RecyclerView mRecyclerView;
-    private PagerSnapHelper mPagerSnapHelper;
+    private LoopPagerSnapHelper mPagerSnapHelper;
     LoopScrollEventAdapter mLoopScrollEventAdapter;
     private CompositeOnPageChangeCallback mPageChangeEventDispatcher;
     private LoopFakeDrag mLoopFakeDragger;
@@ -786,7 +787,6 @@ public final class LoopViewPager2 extends ViewGroup {
     }
 
     /**
-     * 注意limit这个参数，如果为默认值(OFFSCREEN_PAGE_LIMIT_DEFAULT)则adapter的最小数据要为3个，否则为limit+3个。
      * <p>Set the number of pages that should be retained to either side of the currently visible
      * page(s). Pages beyond this limit will be recreated from the adapter when needed. Set this to
      * {@link #OFFSCREEN_PAGE_LIMIT_DEFAULT} to use RecyclerView's caching strategy. The given value
@@ -978,6 +978,7 @@ public final class LoopViewPager2 extends ViewGroup {
         public boolean onInterceptTouchEvent(MotionEvent ev) {
             return isUserInputEnabled() && super.onInterceptTouchEvent(ev);
         }
+
     }
 
     private class LinearLayoutManagerImpl extends LoopLinearLayoutManager {
@@ -1005,7 +1006,10 @@ public final class LoopViewPager2 extends ViewGroup {
         protected void calculateExtraLayoutSpace(@NonNull RecyclerView.State state,
                                                  @NonNull int[] extraLayoutSpace) {
             int pageLimit = getOffscreenPageLimit();
-            if (pageLimit == OFFSCREEN_PAGE_LIMIT_DEFAULT) {
+            Adapter<?> adapter = mRecyclerView.getAdapter();
+            //如果adapter的数据不满足循环条件.
+            boolean adapterDataNotEnough = adapter == null || adapter.getItemCount() <= 3;
+            if (adapterDataNotEnough || pageLimit == OFFSCREEN_PAGE_LIMIT_DEFAULT) {
                 // Only do custom prefetching of offscreen pages if requested
                 super.calculateExtraLayoutSpace(state, extraLayoutSpace);
                 return;
@@ -1023,7 +1027,7 @@ public final class LoopViewPager2 extends ViewGroup {
         }
     }
 
-    private class PagerSnapHelperImpl extends PagerSnapHelper {
+    private class PagerSnapHelperImpl extends LoopPagerSnapHelper {
         PagerSnapHelperImpl() {
         }
 
